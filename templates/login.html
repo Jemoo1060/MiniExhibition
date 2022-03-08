@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
@@ -43,12 +44,9 @@
 
         .header > h1 {
             font-size: 60px;
+            cursor: pointer;
         }
 
-        .header > img {
-            width: 180px;
-            height: 100px;
-        }
 
         .mainPic {
 
@@ -225,8 +223,7 @@
                 success: function (response) {
                     if (response['result'] == 'success') {
                         $.cookie('mytoken', response['token'], {path: '/'});
-
-                        window.location.replace("/")
+                        window.location.href = "/"
                     } else {
                         alert(response['msg'])
                     }
@@ -320,15 +317,22 @@
                 }
             });
         }
+
         // 아이디 생성조건 제약
         function is_nickname(asValue) {
             var regExp = /^(?=.*[a-zA-Z])[-a-zA-Z0-9_.]{2,10}$/;
             return regExp.test(asValue);
         }
+
         // 비밀번호 생성조건 제약
         function is_password(asValue) {
             var regExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z!@#$%^&*]{8,20}$/;
             return regExp.test(asValue);
+        }
+
+        // 메인페이지로
+        function to_main() {
+            window.location.href = "/"
         }
 
 
@@ -337,7 +341,7 @@
 <body>
 
 <div class="header">
-    <h1>미니 전시회</h1>
+    <h1 onclick="to_main()">미니 전시회</h1>
 </div>
 
 <!--로그인 박스-->

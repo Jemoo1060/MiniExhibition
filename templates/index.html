@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+    <title>메인 페이지</title>
+    <style>
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        .mainBoard {
+            width: 100%;
+            height: 200px;
+
+            background-color: dodgerblue;
+
+
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .mainBoard > h1 {
+            font-size: 60px;
+            cursor: pointer;
+        }
+
+        .bts {
+
+            margin: 20px 30px 0 0;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .bts > button {
+            margin-right: 20px;
+            font-size: 20px;
+        }
+
+
+        .explain {
+            width: 95%;
+            max-width: 1000px;
+            margin: 20px auto 0px auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .explain > p {
+            font-size: 30px;
+        }
+
+
+        .pics {
+            margin: 20px auto 0px auto;
+            width: 95%;
+            max-width: 1300px;
+        }
+
+        .card{
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function login_page() {
+            window.location.href = "/loginpage"
+        }
+
+
+        function to_upload() {
+            window.location.href = "/posting"
+        }
+
+        //로그아웃
+        function logout() {
+            $.removeCookie('mytoken');
+
+            window.location.href = "/"
+        }
+
+        // 메인페이지로
+        function to_main() {
+            window.location.href = "/"
+        }
+
+        $(document).ready(function () {
+            btn_check();
+            //listing(); // 게시글 나열(사이드서버 렌더링으로 대체함)
+        });
+
+        // 로그인 버튼, 로그아웃 버튼 교체
+        function btn_check() {
+            if ($.cookie('mytoken') == undefined) {
+                $('#loginBtn').show()
+                $('#logoutBtn').hide()
+                $('#postBtn').hide()
+            } else {
+                $('#loginBtn').hide()
+                $('#logoutBtn').show()
+                $('#postBtn').show()
+            }
+        }
+        // 게시글 나열(사이드서버 렌더링으로 대체함)
+        function listing() {
+            $.ajax({
+                type: 'GET',
+                url: '/posting/post',
+                data: {},
+                success: function (response) {
+                    let rows = response['images']
+
+                    for (let i = 0; i < rows.length; i++) {
+                        let url_p = rows[i]['url']
+                        let pic_name_p = rows[i]['pic_name']
+                        let writer_id = rows[i]['writer_id']
+
+
+                        let temp_html = ` <div class="col">
+                                                <div class="card">
+                                                    <img src="${url_p}" class="card-img-top" alt="...">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">그림명: ${pic_name_p}</h6>
+                                                        <p class="card-text">아이디:${writer_id} </p>
+                                                    </div>
+                                                </div>
+                                            </div>`
+
+                        $('#exhibition').append(temp_html)
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<div class="mainBoard">
+    <h1 onclick="to_main()">미니 전시회</h1>
+</div>
+<div class="bts">
+    <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
+    <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+</div>
+
+<div class="explain">
+    <p>작품을 투고하여 자랑하고, 서로의 작품을 자유롭게 열람하면서 즐길 수 있도록 공유하는 플랫폼입니다.</p>
+</div>
+
+<div class="pics">
+    <div class="row row-cols-1 row-cols-md-4 g-4" id="exhibition">
+        {% for row in rows %}
+            <div class="col">
+                <div onclick="" class="card">
+                    <img src="{{row['url']}}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h6 class="card-title">그림명:{{row['pic_name']}}</h6>
+                        <p class="card-text">아이디:{{row['writer_id']}}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+</body>
+</html>
