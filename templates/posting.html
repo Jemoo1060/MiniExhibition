@@ -87,11 +87,20 @@
             font-size: 28px;
         }
 
+
+        .guidance {
+            margin: auto;
+
+            width: 95%;
+            max-width: 700px;
+
+            justify-content: left;
+        }
+
         .url_box {
             width: 95%;
             max-width: 700px;
             margin: 20px auto 0px auto;
-            padding: 20px;
 
             display: flex;
             flex-direction: row;
@@ -106,30 +115,14 @@
             height: 300px;
         }
 
-        .picurl {
-            width: 500px;
-            height: 50px;
-            margin-right: 10px;
-        }
-
         .url_box > button {
             margin-right: 20px
         }
 
-        .picurl {
-            width: 1000px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-        }
 
-        #url {
-            width: 500px;
-        }
-
-        .picurl > button {
-            font-size: 18px;
+        .url_box > button {
+            width: 100px;
+            font-size: 15px;
             margin-left: 10px;
             height: 50px;
         }
@@ -147,9 +140,9 @@
             font-size: 18px;
         }
 
-        .redfont {
+        #help_pic_name, #help_pic_explain{
             color: red;
-            font-size: 18px;
+            display: none;
         }
 
         #cancelBtn {
@@ -159,7 +152,6 @@
 
     </style>
     <script>
-
 
         $(document).ready(function () {
             btn_check(); // 로그인 로그아웃 버튼
@@ -175,49 +167,6 @@
             window.location.href = "/"
         }
 
-        // 글 등록
-        function post_upload() {
-
-            let url = $('#url').val();
-            let pic_name = $('#pic_name').val();
-            let pic_explain = $('#pic_explain').val();
-
-            $.ajax({
-                type: 'POST',
-                url: '/posting/post',
-
-                data: {url_give: url, pic_name_give: pic_name, pic_explain_give: pic_explain},
-                success: function (response) {
-                    alert(response['msg'])
-                    window.location.href = "/"
-                }
-            });
-        }
-
-        // 그림 미리보기
-        function picshow() {
-            let url = $("#url").val()
-
-            if (url != "") {
-
-                $('#cancelBtn').show();
-                $('#previewBtn').hide();
-                $('#image').show();
-                let temp = ` <img src="${url}">`
-                $('#image').append(temp);
-            } else {
-                $('#url_help_text').text('그림 URL을 입력해주세요').addClass("redfont");
-            }
-
-        }
-
-        // 그림 미리보기 취소
-        function picreset() {
-            $('#url').val('');
-            $('#cancelBtn').hide();
-            $('#previewBtn').show();
-            $('#image').empty().hide();
-        }
 
         //로그아웃
         function logout() {
@@ -239,28 +188,112 @@
             }
         }
 
+        // 글 등록(image 업로드)
+        function post_upload() {
 
+            let file = $('#inputGroupFile04')[0].files[0]
+
+            let pic_name = $('#pic_name').val();
+            let pic_explain = $('#pic_explain').val();
+            let file_chk = $('#inputGroupFile04').val();
+
+            if(file_chk == ''){
+                alert('올바른 파일을 첨부해주세요')
+                return
+            }
+
+            if(pic_name == ''){
+                $('#help_pic_name').show()
+                $('#pic_name').focus()
+                return
+            }
+            if(pic_explain == ''){
+                $('#help_pic_explain').show()
+                $('#pic_explain').focus()
+                return
+            }
+
+            let form_data = new FormData()
+            form_data.append("file_give", file)
+            form_data.append("pic_name_give", pic_name)
+            form_data.append("pic_explain_give", pic_explain)
+
+            $.ajax({
+                type: 'POST',
+                url: '/posting/post',
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.href = "/"
+                }
+            });
+        }
+
+        // 그림 미리보기(preview업로드)
+        function update_profile() {
+            let file_chk = $('#inputGroupFile04').val();
+            if (file_chk != '') {
+                let file = $('#inputGroupFile04')[0].files[0]
+                let form_data = new FormData()
+                form_data.append("file_give", file)
+
+                $.ajax({
+                    type: "POST",
+                    url: "/update_profile",
+                    data: form_data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+
+                        if (response["result"] == "success") {
+                            $('#cancelBtn').show();
+                            $('#previewBtn').hide();
+                            $('#image').show();
+                            let temp = ` <img src="../static/preview/${response["filename"]}">`
+                            $('#image').append(temp);
+                        }
+                    }
+                });
+            } else {
+                alert('올바른 파일을 첨부해주세요')
+            }
+
+        }
+
+        // 그림 미리보기 취소
+        function picreset() {
+            $('#inputGroupFile04').val('');
+            $('#cancelBtn').hide();
+            $('#previewBtn').show();
+            $('#image').empty().hide();
+        }
     </script>
 </head>
 <body>
+
 <div class="mainBoard">
     <h1 onclick="to_main()">미니 전시회</h1>
 </div>
 <div class="bts">
     <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
-    <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
     <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
 </div>
 
+<div class="guidance">
+    <p>그림 첨부하기</p>
+</div>
 <div class="url_box" id="url-box">
-    <div class="picurl">
-        <div class="form-floating mb-3">
-            <input id="url" type="email" class="form-control" placeholder="name@example.com">
-            <label id="url_help_text">그림 URL 입력</label>
-        </div>
-        <button id="previewBtn" onclick="picshow()" type="button" class="btn btn-dark">미리보기</button>
-        <button id="cancelBtn" onclick="picreset()" type="button" class="btn btn-dark">취소</button>
+    <div class="input-group">
+        <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04"
+               aria-label="Upload">
+
     </div>
+    <button id="previewBtn" onclick="update_profile()" type="button" class="btn btn-dark">미리보기</button>
+    <button id="cancelBtn" onclick="picreset()" type="button" class="btn btn-dark">취소</button>
 </div>
 
 <div>
@@ -271,9 +304,11 @@
         </div>
 
         <input type="email" class="form-control" id="pic_name" placeholder="그림명:">
+        <p id ="help_pic_name">그림명을 작성 주세요</p>
 
 
         <textarea class="form-control" id="pic_explain" rows="3" placeholder="그림 설명:"></textarea>
+        <p id = "help_pic_explain">그림 설명란을 작성 주세요</p>
         <div class="upbts">
             <button onclick="post_upload()" type="button" class="btn btn-dark">글 등록</button>
             <button onclick="to_main()" type="button" class="btn btn-dark">취소</button>
@@ -281,5 +316,6 @@
 
     </div>
 </div>
+
 </body>
 </html>

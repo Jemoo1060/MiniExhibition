@@ -178,7 +178,7 @@
         {% for row in rows %}
             <div class="col">
                 <div onclick="to_detailPost({{row['post_num']}})" class="card">
-                    <img src="{{row['url']}}" class="card-img-top" alt="...">
+                    <img src="../static/image/{{row['file']}}" class="card-img-top" alt="...">
                     <div class="card-body">
                         <h6 class="card-title">그림명:{{row['pic_name']}}</h6>
                         <p class="card-text">아이디:{{row['writer_id']}}</p>

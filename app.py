@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify, url_for, redirect
 from pymongo import MongoClient
 import requests
+from werkzeug.utils import secure_filename
 import datetime
 import jwt
 import hashlib
 import certifi
 from datetime import datetime, timedelta
+import random
 
 ca = certifi.where()
 client = MongoClient('mongodb+srv://test:sparta@cluster0.a6f1b.mongodb.net/Cluster0?retryWrites=true&w=majority',
@@ -95,18 +97,23 @@ def detailPage(keyword):
     comment_list = list(db.comment.find({'post_num': int(keyword)}, {'_id': False}))
 
     token_receive = request.cookies.get('mytoken')
-    try:
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        user_id = payload["id"]
+    # 비 로그인 접속 확인
+    if token_receive is not None :
+        try:
+            payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+            user_id = payload["id"]
 
-        if user_id == postInfo['writer_id']:
-            idCheck = True
-        else:
-            idCheck = False
+            if user_id == postInfo['writer_id']:
+                idCheck = True
+            else:
+                idCheck = False
 
+            return render_template('detail.html', post_info=postInfo, comment_info=comment_list, id_check=idCheck)
+        except(jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+            return redirect(url_for("home"))
+    else :
+        idCheck = False
         return render_template('detail.html', post_info=postInfo, comment_info=comment_list, id_check=idCheck)
-    except(jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-        return redirect(url_for("home"))
 
 
 # 글 등록
@@ -117,21 +124,27 @@ def upload_post():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
 
         user_id = payload["id"]
-        url_receive = request.form['url_give']
+        file = request.files["file_give"]
         pic_name_receive = request.form['pic_name_give']
         pic_explain_receive = request.form['pic_explain_give']
 
-        url_list = list(db.post.find({}, {'_id': False}).distinct('post_num'))  # distinct는 key 값 생략하고 value 값만 가져오기
+        post_list = list(db.post.find({}, {'_id': False}).distinct('post_num'))  # distinct는 key 값 생략하고 value 값만 가져오기
 
-        if len(url_list) == 0:
+        if len(post_list) == 0:
             count = 1
         else:
-            count = max(url_list) + 1
+            count = max(post_list) + 1
+
+        file_fullname = secure_filename(file.filename)
+        pure_file_name = file_fullname.split(".")[0]
+        extension = file_fullname.split(".")[1]
+        filename = pure_file_name + str(count) + '.'+ extension  # 중복 최소화
+        file.save("static/image/" + filename)
 
         doc = {
             'post_num': count,
             'writer_id': user_id,
-            'url': url_receive,
+            'file': filename,
             'pic_name': pic_name_receive,
             'pic_explain': pic_explain_receive
         }
@@ -206,6 +219,16 @@ def cancel_check():
     except(jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
 
+# 파일 미리보기
+@app.route('/update_profile', methods=['POST'])
+def save_img():
+    file = request.files["file_give"]
+    file_fullname = secure_filename(file.filename)
+    file_name = file_fullname.split(".")[0]
+    extension = file_fullname.split(".")[1]
+    preview_name = file_name + str(random.randrange(1,50)) +'.'+ extension # 중복 최소화
+    file.save("static/preview/" + preview_name)
+    return jsonify({"result": "success", 'filename' : preview_name})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

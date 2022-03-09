@@ -90,6 +90,11 @@
             justify-content: center;
         }
 
+        .picimg > img {
+            min-width: 400px;
+            min-height: 400px;
+        }
+
         .picexplain {
             margin-top: 30px;
             min-height: 100px;
@@ -281,7 +286,7 @@
         </div>
         <div></div>
         <div class="picimg">
-            <img src="{{ post_info['url'] }}">
+            <img src="../static/image/{{post_info['file']}}">
         </div>
         <div class="picexplain">
             <p>{{ post_info['pic_explain'] }}</p>
