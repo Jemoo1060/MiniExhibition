@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+    <title>메인 페이지</title>
+    <style>
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        .mainBoard {
+            width: 100%;
+            height: 200px;
+
+            background-color: dodgerblue;
+
+
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .mainBoard > h1 {
+            font-size: 60px;
+            cursor: pointer;
+        }
+
+        .bts {
+
+            margin: 20px 30px 0 0;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .bts > button {
+            margin-right: 20px;
+            font-size: 20px;
+        }
+
+        .content {
+            max-width: 900px;
+            width: 80%;
+
+            margin: 30px auto auto auto;
+            word-break: break-all;
+
+        }
+
+
+        .pictitle > h1 {
+            color: brown;
+            font-size: 60px;
+            line-height: 3px;
+        }
+
+        .pictitle > p {
+            font-size: 22px;
+        }
+
+        .picimg {
+
+            margin-top: 30px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .picexplain {
+            margin-top: 30px;
+            min-height: 100px;
+            font-size: 25px;
+        }
+
+        .post_cancel {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .setting_btn {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+
+        }
+
+        .setting_btn > img {
+            cursor: pointer;
+        }
+
+        .setting_btn > button {
+            font-size: 1px;
+            line-height: 10px;
+
+        }
+
+        .comment > hr {
+            border: solid 1px;
+        }
+
+        .comment > p {
+            line-height: 20px;
+        }
+
+        .comment_input_box {
+            background-color: #D3D3D3;
+            min-height: 160px;
+            margin-bottom: 100px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment_input_box > button {
+            margin-left: 20px;
+            font-size: 20px;
+            height: 90px;
+        }
+
+        .field {
+            max-width: 800px;
+            width: 80%;
+
+        }
+
+        #comment_text {
+            font-size: 15px;
+            resize: none
+        }
+
+    </style>
+    <script>
+
+        $(document).ready(function () {
+            btn_check();
+
+        });
+
+        // 로그인 페이지로
+        function login_page() {
+            window.location.href = "/loginpage"
+        }
+
+        // 글쓰기 페이지로
+        function to_upload() {
+            window.location.href = "/posting"
+        }
+
+        //로그아웃
+        function logout() {
+            $.removeCookie('mytoken');
+
+            window.location.href = "/"
+        }
+
+        // 메인페이지로
+        function to_main() {
+            window.location.href = "/"
+        }
+
+        // 로그인 버튼, 로그아웃 버튼 교체
+        function btn_check() {
+            if ($.cookie('mytoken') == undefined) {
+                $('#loginBtn').show()
+                $('#logoutBtn').hide()
+                $('#postBtn').hide()
+            } else {
+                $('#loginBtn').hide()
+                $('#logoutBtn').show()
+                $('#postBtn').show()
+            }
+        }
+
+        // 댓글 등록
+        function comment_upload(post_num) {
+            let comment = $('#comment_text').val();
+
+            $.ajax({
+                type: 'POST',
+                url: '/comment',
+
+                data: {'post_num_give': post_num, 'comment_give': comment},
+                success: function (response) {
+                    location.reload();
+                }
+            });
+        }
+
+
+        // 댓글 삭제
+        function comment_setting(post_num, comment_num, comment_writer_id) {
+            if (confirm('해당 댓글을 삭제 하시겠습니까?')) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/comment_cancel_check',
+
+                    data: {
+                        'comment_writer_id_give': comment_writer_id
+                        , 'post_num_give': post_num,
+                        'comment_num_give': comment_num
+                    },
+                    success: function (response) {
+
+                        if (response['check']) {
+                            location.reload();
+                        } else {
+                            alert('댓글 작성자만이 가능한 기능입니다')
+                        }
+                    }
+                });
+            } else {
+                return;
+            }
+        }
+
+        // 게시글 삭제
+        function post_setting(post_num) {
+            if (confirm('해당 댓글을 삭제 하시겠습니까?')) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/post_cancel',
+
+                    data: {
+                        'post_num_give': post_num
+                    },
+                    success: function (response) {
+                        alert(response['msg'])
+                        window.location.href = "/"
+                    }
+                });
+            } else {
+                return;
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="mainBoard">
+    <h1 onclick="to_main()">미니 전시회</h1>
+</div>
+<div class="bts">
+    <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
+    <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+</div>
+<div class="content">
+    <!--글 내용-->
+    <section>
+        <div class="pictitle">
+            <h1>{{ post_info['pic_name'] }}</h1>
+            <p>작성자 : {{ post_info['writer_id'] }}<p>
+        </div>
+        <div></div>
+        <div class="picimg">
+            <img src="{{ post_info['url'] }}">
+        </div>
+        <div class="picexplain">
+            <p>{{ post_info['pic_explain'] }}</p>
+        </div>
+        <!-- 삭제 버튼 보이기 안보이기 -->
+        {% if id_check == True %}
+            <div class="post_cancel">
+                <button id="post_cancel_btn" type="button" class="btn btn-outline-dark"
+                        onclick="post_setting('{{ post_info['post_num'] }}')">삭제
+                </button>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- 댓글 나열 -->
+    <section>
+        <hr style="border: solid 1px">
+        {% for comment in comment_info %}
+            <div class="comment">
+                <p>댓글작성자 : {{ comment['comment_writer_id'] }} </p>
+                <p>내용 : {{ comment['comment_text'] }}</p>
+                <div class="setting_btn">
+                    <button id="cancel_btn" type="button" class="btn btn-outline-dark"
+                            onclick="comment_setting('{{ comment['post_num'] }}','{{ comment['comment_num'] }}','{{ comment['comment_writer_id'] }}')">
+                        삭제
+                    </button>
+                </div>
+                <hr>
+            </div>
+        {% endfor %}
+
+    </section>
+
+    <!-- 댓글 등록 -->
+    <section>
+        <div class="comment_input_box">
+            <div class="field">
+                <div class="control is-small is-loading">
+                    <textarea id="comment_text" class="textarea is-small" placeholder="댓글 달아주세요"></textarea>
+                </div>
+            </div>
+            <button type="button" class="btn btn-light" onclick="comment_upload({{ post_info['post_num'] }})">등록
+            </button>
+        </div>
+    </section>
+
+
+</div>
+</body>
+</html>

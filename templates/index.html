@@ -106,6 +106,10 @@
             window.location.href = "/"
         }
 
+        function to_detailPost(post_num){
+                window.location.href = "/detailPost/" + post_num
+        }
+
         $(document).ready(function () {
             btn_check();
             //listing(); // 게시글 나열(사이드서버 렌더링으로 대체함)
@@ -173,7 +177,7 @@
     <div class="row row-cols-1 row-cols-md-4 g-4" id="exhibition">
         {% for row in rows %}
             <div class="col">
-                <div onclick="" class="card">
+                <div onclick="to_detailPost({{row['post_num']}})" class="card">
                     <img src="{{row['url']}}" class="card-img-top" alt="...">
                     <div class="card-body">
                         <h6 class="card-title">그림명:{{row['pic_name']}}</h6>
