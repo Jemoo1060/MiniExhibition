@@ -21,7 +21,7 @@ SECRET_KEY = 'miniExhibition'
 # 메인페이지 이동
 @app.route('/')
 def home():
-    rows = list(db.post.find({}, {'_id': False}))
+    rows = list(db.posts.find({}, {'_id': False}))
 
     token_receive = request.cookies.get('mytoken')
 
@@ -29,7 +29,7 @@ def home():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_id = payload["id"]
 
-        userInfo = db.miniExhibition.find_one({'user_id': user_id}, {'_id': False})
+        userInfo = db.users.find_one({'user_id': user_id}, {'_id': False})
 
         # 비 로그인 접속 확인
         if userInfo is not None:
@@ -57,7 +57,7 @@ def join():
         "user_id": id_receive,  # 아이디
         "pwd": password_hash,  # 비밀번호
     }
-    db.miniExhibition.insert_one(doc)
+    db.users.insert_one(doc)
     return jsonify({'result': 'success'})
 
 
@@ -65,10 +65,9 @@ def join():
 @app.route('/check_dup', methods=['POST'])
 def check_dup():
     username_receive = request.form['user_id']
-    exists = bool(db.miniExhibition.find_one({"user_id": username_receive}, {'_id': False}))
+    exists = bool(db.users.find_one({"user_id": username_receive}, {'_id': False}))
 
     return jsonify({'result': 'success', 'exists': exists})
-
 
 # 로그인
 @app.route("/login", methods=["POST"])
@@ -78,14 +77,16 @@ def login():
 
     pw_hash = hashlib.sha256(pwd_receive.encode('utf-8')).hexdigest()
 
-    user = db.miniExhibition.find_one({'user_id': id_receive, 'pwd': pw_hash}, {'_id': False})
+    user = db.users.find_one({'user_id': id_receive, 'pwd': pw_hash}, {'_id': False})
 
     if user is not None:
         payload = {
             'id': id_receive,
             'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8') # 우분투 파일에서 utf-8 적용 안하면 에러남
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
         return jsonify({'result': 'success', 'token': token})
     else:
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
@@ -107,7 +108,7 @@ def postingPage():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_id = payload["id"]
 
-        userInfo = db.miniExhibition.find_one({'user_id': user_id}, {'_id': False})
+        userInfo = db.users.find_one({'user_id': user_id}, {'_id': False})
 
         if userInfo is not None:
             loginCheck = True  # 로그인, 로그아웃, 글쓰기 버튼 유무
@@ -124,7 +125,7 @@ def postingPage():
 # 상세 글 페이지 이동
 @app.route('/detailPost/<keyword>')
 def detailPage(keyword):
-    postInfo = db.post.find_one({'post_num': int(keyword)}, {'_id': False})
+    postInfo = db.posts.find_one({'post_num': int(keyword)}, {'_id': False})
     comment_list = list(db.comment.find({'post_num': int(keyword)}, {'_id': False}))
 
     token_receive = request.cookies.get('mytoken')
@@ -133,7 +134,7 @@ def detailPage(keyword):
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_id = payload["id"]
 
-        userInfo = db.miniExhibition.find_one({'user_id': user_id}, {'_id': False})
+        userInfo = db.users.find_one({'user_id': user_id}, {'_id': False})
         # 비 로그인 접속 확인
         if userInfo is not None:
             loginCheck = True  # 로그인, 로그아웃, 글쓰기 버튼 유무
@@ -177,7 +178,7 @@ def upload_post():
         pic_name_receive = request.form['pic_name_give']
         pic_explain_receive = request.form['pic_explain_give']
 
-        post_list = list(db.post.find({}, {'_id': False}).distinct('post_num'))  # distinct는 key 값 생략하고 value 값만 가져오기
+        post_list = list(db.posts.find({}, {'_id': False}).distinct('post_num'))  # distinct는 key 값 생략하고 value 값만 가져오기
 
         if len(post_list) == 0:
             count = 1
@@ -198,7 +199,7 @@ def upload_post():
             'pic_explain': pic_explain_receive
         }
 
-        db.post.insert_one(doc)
+        db.posts.insert_one(doc)
         return jsonify({'msg': '등록완료!'})
     except(jwt.exceptions.DecodeError):  # 비 로그인
         return redirect(url_for("loginPage", msg="로그인 해주세요"))
@@ -211,8 +212,8 @@ def upload_post():
 def post_cancel():
 
     post_num_receive = request.form['post_num_give']
-    db.post.delete_one({'post_num': int(post_num_receive)})
-
+    db.posts.delete_one({'post_num': int(post_num_receive)})
+    db.comment.delete_many({'post_num': int(post_num_receive)})
     return jsonify({'msg': '삭제되었습니다'})
 
 
@@ -229,7 +230,7 @@ def upload_comment():
         comment_text = request.form['comment_give']
 
         # 비 로그인 접속 확인
-        userInfo = db.miniExhibition.find_one({'user_id': user_id}, {'_id': False})
+        userInfo = db.users.find_one({'user_id': user_id}, {'_id': False})
         if userInfo is not None:
             loginCheck = True
         else :
