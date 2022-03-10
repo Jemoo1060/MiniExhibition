@@ -18,129 +18,16 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 
+    <!-- CSS 적용 -->
+    <link href="../static/css/common.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/css/index.css" rel="stylesheet" type="text/css" />
+    <!-- JS 적용-->
+    <script type="text/javascript" src="../static/js/index.js"></script>
+
     <title>메인 페이지</title>
-    <style>
-        * {
-            font-family: 'Gowun Dodum', sans-serif;
-        }
-
-        .mainBoard {
-            width: 100%;
-            height: 200px;
-
-            background-color: dodgerblue;
-
-
-            color: white;
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-
-        }
-
-        .mainBoard > h1 {
-            font-size: 60px;
-            cursor: pointer;
-        }
-
-        .bts {
-
-            margin: 20px 30px 0 0;
-
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: right;
-        }
-
-        .bts > button {
-            margin-right: 20px;
-            font-size: 20px;
-        }
-
-        .select-box {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: right;
-            margin-top: 5px;
-            margin-right: 30px;
-        }
-
-        .help_select{
-            color: red;
-            font-size: 30px;
-        }
-
-
-        .explain {
-            width: 95%;
-            max-width: 1000px;
-            margin: 20px auto 0px auto;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .explain > p {
-            font-size: 30px;
-        }
-
-
-        .pics {
-            margin: 20px auto 0px auto;
-            width: 95%;
-            max-width: 1300px;
-        }
-
-        .card {
-            cursor: pointer;
-        }
-    </style>
-    <script>
-        function login_page() {
-            window.location.href = "/loginpage"
-        }
-
-
-        function to_upload() {
-            window.location.href = "/posting"
-        }
-
-        //로그아웃
-        function logout() {
-            $.removeCookie('mytoken', {path: '/'});
-            window.location.href = "/"
-        }
-
-        // 메인페이지로
-        function to_main() {
-            window.location.href = "/"
-        }
-
-        // 상세 게시글로
-        function to_detailPost(post_num) {
-            window.location.href = "/detailPost/" + post_num
-        }
-
-        // 검색 기능 사용
-        function select_post() {
-
-            let pic_name = $('#select_input').val()
-
-            if (pic_name == '') {
-                alert('검색어를 적어주세요')
-                return
-            }
-             window.location.href = "/select/" + pic_name
-        }
-
-
-    </script>
 </head>
 <body>
-<div class="mainBoard">
+<div class="header">
     <h1 onclick="to_main()">미니 전시회</h1>
 </div>
 <div class="bts">

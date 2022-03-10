@@ -1,0 +1,40 @@
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        .header {
+            width: 100%;
+            height: 200px;
+
+            background-color: dodgerblue;
+            background-position: center;
+            background-size: cover;
+
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .header > h1 {
+            font-size: 60px;
+            cursor: pointer;
+        }
+
+        .bts {
+
+            margin: 20px 30px 0 0;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .bts > button {
+            margin-right: 20px;
+            font-size: 20px;
+        }

@@ -1,0 +1,89 @@
+
+        .picup {
+            max-width: 800px;
+            width: 95%;
+            margin: 10px auto;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .upbts {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+
+        .upbts > button {
+            margin-right: 40px;
+            font-size: 28px;
+        }
+
+
+        .guidance {
+            margin: auto;
+
+            width: 95%;
+            max-width: 700px;
+
+            justify-content: left;
+        }
+
+        .url_box {
+            width: 95%;
+            max-width: 700px;
+            margin: 20px auto 0px auto;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        #image {
+            display: none;
+            width: 400px;
+            height: 300px;
+        }
+
+        .url_box > button {
+            margin-right: 20px
+        }
+
+
+        .url_box > button {
+            width: 100px;
+            font-size: 15px;
+            margin-left: 10px;
+            height: 50px;
+        }
+
+        #pic_name {
+            width: 700px;
+            height: 60px;
+            font-size: 18px;
+        }
+
+        #pic_explain {
+            margin-top: 20px;
+            width: 700px;
+            height: 500px;
+            font-size: 18px;
+        }
+
+        #help_pic_name, #help_pic_explain {
+            color: red;
+            display: none;
+        }
+
+        #cancelBtn {
+            display: none;
+        }
+

@@ -1,0 +1,102 @@
+
+        .content {
+            max-width: 900px;
+            width: 80%;
+
+            margin: 30px auto auto auto;
+            word-break: break-all;
+
+        }
+
+
+        .pictitle > h1 {
+            color: brown;
+            font-size: 60px;
+            line-height: 3px;
+        }
+
+        .pictitle > p {
+            font-size: 22px;
+        }
+
+        .picimg {
+
+            margin-top: 30px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .picimg > img {
+            min-width: 400px;
+            min-height: 400px;
+        }
+
+        .picexplain {
+            margin-top: 30px;
+            min-height: 100px;
+            font-size: 25px;
+        }
+
+        .post_cancel {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .setting_btn {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+
+        }
+
+        .setting_btn > img {
+            cursor: pointer;
+        }
+
+        .setting_btn > button {
+            font-size: 1px;
+            line-height: 10px;
+
+        }
+
+        .comment > hr {
+            border: solid 1px;
+        }
+
+        .comment > p {
+            line-height: 20px;
+        }
+
+        .comment_input_box {
+            background-color: #D3D3D3;
+            min-height: 160px;
+            margin-bottom: 100px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment_input_box > button {
+            margin-left: 20px;
+            font-size: 20px;
+            height: 90px;
+        }
+
+        .field-box {
+            max-width: 800px;
+            width: 80%;
+
+        }
+
+        #comment_text {
+            font-size: 15px;
+            resize: none
+        }

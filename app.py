@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, jsonify, url_for, redirect
 from pymongo import MongoClient
-import requests
 from werkzeug.utils import secure_filename
 import datetime
 import jwt
@@ -112,8 +111,8 @@ def login():
             'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
 
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8') # 우분투 파일에서 utf-8 적용 안하면 에러남
-        #token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        #token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8') # 우분투 파일에서 utf-8 적용 안하면 에러남
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
         return jsonify({'result': 'success', 'token': token})
     else:
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
