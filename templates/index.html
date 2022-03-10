@@ -80,7 +80,7 @@
             max-width: 1300px;
         }
 
-        .card{
+        .card {
             cursor: pointer;
         }
     </style>
@@ -96,8 +96,7 @@
 
         //로그아웃
         function logout() {
-            $.removeCookie('mytoken');
-
+            $.removeCookie('mytoken', {path: '/'});
             window.location.href = "/"
         }
 
@@ -106,57 +105,10 @@
             window.location.href = "/"
         }
 
-        function to_detailPost(post_num){
-                window.location.href = "/detailPost/" + post_num
+        function to_detailPost(post_num) {
+            window.location.href = "/detailPost/" + post_num
         }
 
-        $(document).ready(function () {
-            btn_check();
-            //listing(); // 게시글 나열(사이드서버 렌더링으로 대체함)
-        });
-
-        // 로그인 버튼, 로그아웃 버튼 교체
-        function btn_check() {
-            if ($.cookie('mytoken') == undefined) {
-                $('#loginBtn').show()
-                $('#logoutBtn').hide()
-                $('#postBtn').hide()
-            } else {
-                $('#loginBtn').hide()
-                $('#logoutBtn').show()
-                $('#postBtn').show()
-            }
-        }
-        // 게시글 나열(사이드서버 렌더링으로 대체함)
-        function listing() {
-            $.ajax({
-                type: 'GET',
-                url: '/posting/post',
-                data: {},
-                success: function (response) {
-                    let rows = response['images']
-
-                    for (let i = 0; i < rows.length; i++) {
-                        let url_p = rows[i]['url']
-                        let pic_name_p = rows[i]['pic_name']
-                        let writer_id = rows[i]['writer_id']
-
-
-                        let temp_html = ` <div class="col">
-                                                <div class="card">
-                                                    <img src="${url_p}" class="card-img-top" alt="...">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title">그림명: ${pic_name_p}</h6>
-                                                        <p class="card-text">아이디:${writer_id} </p>
-                                                    </div>
-                                                </div>
-                                            </div>`
-
-                        $('#exhibition').append(temp_html)
-                    }
-                }
-            })
-        }
     </script>
 </head>
 <body>
@@ -164,9 +116,13 @@
     <h1 onclick="to_main()">미니 전시회</h1>
 </div>
 <div class="bts">
-    <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
-    <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
-    <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% if login_check == False %}
+        <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    {% endif %}
+    {% if login_check == True %}
+        <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
+        <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% endif %}
 </div>
 
 <div class="explain">
@@ -177,11 +133,11 @@
     <div class="row row-cols-1 row-cols-md-4 g-4" id="exhibition">
         {% for row in rows %}
             <div class="col">
-                <div onclick="to_detailPost({{row['post_num']}})" class="card">
-                    <img src="../static/image/{{row['file']}}" class="card-img-top" alt="...">
+                <div onclick="to_detailPost({{ row['post_num'] }})" class="card">
+                    <img src="../static/image/{{ row['file'] }}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        <h6 class="card-title">그림명:{{row['pic_name']}}</h6>
-                        <p class="card-text">아이디:{{row['writer_id']}}</p>
+                        <h6 class="card-title">그림명:{{ row['pic_name'] }}</h6>
+                        <p class="card-text">아이디:{{ row['writer_id'] }}</p>
                     </div>
                 </div>
             </div>

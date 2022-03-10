@@ -165,11 +165,6 @@
     </style>
     <script>
 
-        $(document).ready(function () {
-            btn_check();
-
-        });
-
         // 로그인 페이지로
         function login_page() {
             window.location.href = "/loginpage"
@@ -182,8 +177,7 @@
 
         //로그아웃
         function logout() {
-            $.removeCookie('mytoken');
-
+            $.removeCookie('mytoken',{path : '/'});
             window.location.href = "/"
         }
 
@@ -192,22 +186,14 @@
             window.location.href = "/"
         }
 
-        // 로그인 버튼, 로그아웃 버튼 교체
-        function btn_check() {
-            if ($.cookie('mytoken') == undefined) {
-                $('#loginBtn').show()
-                $('#logoutBtn').hide()
-                $('#postBtn').hide()
-            } else {
-                $('#loginBtn').hide()
-                $('#logoutBtn').show()
-                $('#postBtn').show()
-            }
-        }
-
         // 댓글 등록
         function comment_upload(post_num) {
             let comment = $('#comment_text').val();
+
+            if (comment == ''){
+                alert('댓글을 작성해주세요')
+                return
+            }
 
             $.ajax({
                 type: 'POST',
@@ -215,7 +201,12 @@
 
                 data: {'post_num_give': post_num, 'comment_give': comment},
                 success: function (response) {
-                    location.reload();
+                    if(response['login_check'] == false){
+                        alert('로그인 후 사용 가능한 기능입니다')
+                    } else {
+                        location.reload();
+                    }
+
                 }
             });
         }
@@ -273,9 +264,13 @@
     <h1 onclick="to_main()">미니 전시회</h1>
 </div>
 <div class="bts">
-    <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
-    <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
-    <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% if login_check == False %}
+        <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    {% endif %}
+    {% if login_check == True %}
+        <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
+        <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% endif %}
 </div>
 <div class="content">
     <!--글 내용-->

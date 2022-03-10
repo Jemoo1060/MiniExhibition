@@ -140,7 +140,7 @@
             font-size: 18px;
         }
 
-        #help_pic_name, #help_pic_explain{
+        #help_pic_name, #help_pic_explain {
             color: red;
             display: none;
         }
@@ -152,10 +152,6 @@
 
     </style>
     <script>
-
-        $(document).ready(function () {
-            btn_check(); // 로그인 로그아웃 버튼
-        });
 
         function to_main() {
             window.location.href = "/"
@@ -170,23 +166,10 @@
 
         //로그아웃
         function logout() {
-            $.removeCookie('mytoken');
-
+            $.removeCookie('mytoken', {path: '/'});
             window.location.href = "/"
         }
 
-        // 로그인 버튼, 로그아웃 버튼 교체
-        function btn_check() {
-            if ($.cookie('mytoken') == undefined) {
-                $('#loginBtn').show();
-                $('#logoutBtn').hide();
-                $('#postBtn').hide();
-            } else {
-                $('#loginBtn').hide();
-                $('#logoutBtn').show();
-                $('#postBtn').show();
-            }
-        }
 
         // 글 등록(image 업로드)
         function post_upload() {
@@ -197,17 +180,17 @@
             let pic_explain = $('#pic_explain').val();
             let file_chk = $('#inputGroupFile04').val();
 
-            if(file_chk == ''){
+            if (file_chk == '') {
                 alert('올바른 파일을 첨부해주세요')
                 return
             }
 
-            if(pic_name == ''){
+            if (pic_name == '') {
                 $('#help_pic_name').show()
                 $('#pic_name').focus()
                 return
             }
-            if(pic_explain == ''){
+            if (pic_explain == '') {
                 $('#help_pic_explain').show()
                 $('#pic_explain').focus()
                 return
@@ -279,8 +262,12 @@
     <h1 onclick="to_main()">미니 전시회</h1>
 </div>
 <div class="bts">
-    <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
-    <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% if login_check == False %}
+        <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    {% endif %}
+    {% if login_check == True %}
+        <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% endif %}
 </div>
 
 <div class="guidance">
@@ -304,11 +291,11 @@
         </div>
 
         <input type="email" class="form-control" id="pic_name" placeholder="그림명:">
-        <p id ="help_pic_name">그림명을 작성 주세요</p>
+        <p id="help_pic_name">그림명을 작성 주세요</p>
 
 
         <textarea class="form-control" id="pic_explain" rows="3" placeholder="그림 설명:"></textarea>
-        <p id = "help_pic_explain">그림 설명란을 작성 주세요</p>
+        <p id="help_pic_explain">그림 설명란을 작성 주세요</p>
         <div class="upbts">
             <button onclick="post_upload()" type="button" class="btn btn-dark">글 등록</button>
             <button onclick="to_main()" type="button" class="btn btn-dark">취소</button>

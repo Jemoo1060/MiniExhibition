@@ -354,6 +354,10 @@
         <p id="help-id-login" class="help is-danger"></p>
         <p>비밀번호 : <input type="password" id="login_pw" placeholder="비밀번호를 입력해 주세요"></p>
         <p id="help-password-login" class="help is-danger"></p>
+        <!-- 쿠키 기간 끝나서 로그아웃 됐을 시 알림 -->
+        {% if msg != None %}
+        <p style="color: red">{{msg}}</p>
+        {% endif %}
 
     </div>
     <div class="login_btn_box">
