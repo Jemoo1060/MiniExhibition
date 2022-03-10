@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+    <title>상세 페이지</title>
+    <style>
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        .mainBoard {
+            width: 100%;
+            height: 200px;
+
+            background-color: dodgerblue;
+
+
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .mainBoard > h1 {
+            font-size: 60px;
+            cursor: pointer;
+        }
+
+        .bts {
+
+            margin: 20px 30px 0 0;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .bts > button {
+            margin-right: 20px;
+            font-size: 20px;
+        }
+
+
+        .picup {
+            max-width: 800px;
+            width: 95%;
+            margin: 10px auto;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .upbts {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+
+        .upbts > button {
+            margin-right: 40px;
+            font-size: 28px;
+        }
+
+
+        .guidance {
+            margin: auto;
+
+            width: 95%;
+            max-width: 700px;
+
+            justify-content: left;
+        }
+
+        .url_box {
+            width: 95%;
+            max-width: 700px;
+            margin: 20px auto 0px auto;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        #image {
+            display: none;
+            width: 400px;
+            height: 300px;
+        }
+
+        .url_box > button {
+            margin-right: 20px
+        }
+
+
+        .url_box > button {
+            width: 100px;
+            font-size: 15px;
+            margin-left: 10px;
+            height: 50px;
+        }
+
+        #pic_name {
+            width: 700px;
+            height: 60px;
+            font-size: 18px;
+        }
+
+        #pic_explain {
+            margin-top: 20px;
+            width: 700px;
+            height: 500px;
+            font-size: 18px;
+        }
+
+        #help_pic_name, #help_pic_explain {
+            color: red;
+            display: none;
+        }
+
+        #cancelBtn {
+            display: none;
+        }
+
+
+    </style>
+    <script>
+
+        function to_main() {
+            window.location.href = "/"
+        }
+
+
+        // 메인페이지로
+        function to_main() {
+            window.location.href = "/"
+        }
+
+
+        //로그아웃
+        function logout() {
+            $.removeCookie('mytoken', {path: '/'});
+            window.location.href = "/"
+        }
+
+
+        // 글 등록(image 업로드)
+        function post_upload() {
+
+            let file = $('#inputGroupFile04')[0].files[0]
+
+            let pic_name = $('#pic_name').val();
+            let pic_explain = $('#pic_explain').val();
+            let file_chk = $('#inputGroupFile04').val();
+
+            if (file_chk == '') {
+                alert('올바른 파일을 첨부해주세요')
+                return
+            }
+
+            if (pic_name == '') {
+                $('#help_pic_name').show()
+                $('#pic_name').focus()
+                return
+            }
+            if (pic_explain == '') {
+                $('#help_pic_explain').show()
+                $('#pic_explain').focus()
+                return
+            }
+
+            let form_data = new FormData()
+            form_data.append("file_give", file)
+            form_data.append("pic_name_give", pic_name)
+            form_data.append("pic_explain_give", pic_explain)
+
+            $.ajax({
+                type: 'POST',
+                url: '/posting/post',
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.href = "/"
+                }
+            });
+        }
+
+        // 그림 미리보기(preview업로드)
+        function update_profile() {
+            let file_chk = $('#inputGroupFile04').val();
+            if (file_chk != '') {
+                let file = $('#inputGroupFile04')[0].files[0]
+                let form_data = new FormData()
+                form_data.append("file_give", file)
+
+                $.ajax({
+                    type: "POST",
+                    url: "/update_profile",
+                    data: form_data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+
+                        if (response["result"] == "success") {
+                            $('#cancelBtn').show();
+                            $('#previewBtn').hide();
+                            $('#image').show();
+                            let temp = ` <img src="../static/preview/${response["filename"]}">`
+                            $('#image').append(temp);
+                        }
+                    }
+                });
+            } else {
+                alert('올바른 파일을 첨부해주세요')
+            }
+
+        }
+
+        // 그림 미리보기 취소
+        function picreset() {
+            $('#inputGroupFile04').val('');
+            $('#cancelBtn').hide();
+            $('#previewBtn').show();
+            $('#image').empty().hide();
+        }
+    </script>
+</head>
+<body>
+
+<div class="mainBoard">
+    <h1 onclick="to_main()">미니 전시회</h1>
+</div>
+<div class="bts">
+    {% if login_check == False %}
+        <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    {% endif %}
+    {% if login_check == True %}
+        <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+    {% endif %}
+</div>
+
+<div class="guidance">
+    <p>그림 첨부하기</p>
+</div>
+<div class="url_box" id="url-box">
+    <div class="input-group">
+        <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04"
+               aria-label="Upload">
+
+    </div>
+    <button id="previewBtn" onclick="update_profile()" type="button" class="btn btn-dark">미리보기</button>
+    <button id="cancelBtn" onclick="picreset()" type="button" class="btn btn-dark">취소</button>
+</div>
+
+<div>
+
+    <div class="picup">
+        <div id="image">
+
+        </div>
+
+        <input type="email" class="form-control" id="pic_name" placeholder="그림명:">
+        <p id="help_pic_name">그림명을 작성 주세요</p>
+
+
+        <textarea class="form-control" id="pic_explain" rows="3" placeholder="그림 설명:"></textarea>
+        <p id="help_pic_explain">그림 설명란을 작성 주세요</p>
+        <div class="upbts">
+            <button onclick="post_upload()" type="button" class="btn btn-dark">글 등록</button>
+            <button onclick="to_main()" type="button" class="btn btn-dark">취소</button>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
