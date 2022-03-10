@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+    <title>메인 페이지</title>
+    <style>
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        .mainBoard {
+            width: 100%;
+            height: 80px;
+
+            background-color: dodgerblue;
+
+
+            color: white;
+
+            text-align: center;
+
+        }
+
+        .mainBoard > h1 {
+            font-size: 60px;
+            cursor: pointer;
+        }
+
+        .bts {
+
+            margin: 20px 30px 0 0;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .bts > button {
+            margin-right: 20px;
+            font-size: 20px;
+        }
+
+        .card {
+            max-width: 800px;
+            width: 90%;
+            margin: 20px auto;
+
+        }
+
+        .upbts {
+            margin-left: 30px;
+        }
+
+        .section {
+            width: 800px;
+            max-width: 100%;
+            margin: 20px auto;
+            background-color: darksalmon;
+        }
+
+        .write_bt {
+            margin-bottom: 10px;
+
+        }
+        .check{
+            display: none;
+        }
+
+    </style>
+    <script>
+        //포스팅
+        function comment() {
+            let comment = $("#comment").val()
+            let now_p_num  = $("#check").text()
+            $.ajax({
+                type: "POST",
+                url: "/comment",
+                data: {
+                    comment_give: comment,
+                    now_give: now_p_num
+
+                },
+                success: function (response) {
+                    alert(response["msg"])
+                    window.location.reload()
+                }
+            })
+        }
+
+
+        function login_page() {
+            window.location.href = "/loginpage"
+        }
+
+
+        function to_upload() {
+            window.location.href = "/posting"
+        }
+
+        //로그아웃
+        function logout() {
+            $.removeCookie('mytoken');
+
+            window.location.href = "/"
+        }
+
+        // 메인페이지로
+        function to_main() {
+            window.location.href = "/"
+        }
+
+        $(document).ready(function () {
+            btn_check();
+            //listing(); // 게시글 나열(사이드서버 렌더링으로 대체함)
+        });
+
+        // 로그인 버튼, 로그아웃 버튼 교체
+        function btn_check() {
+            if ($.cookie('mytoken') == undefined) {
+                $('#loginBtn').show()
+                $('#logoutBtn').hide()
+                $('#postBtn').hide()
+            } else {
+                $('#loginBtn').hide()
+                $('#logoutBtn').show()
+                $('#postBtn').show()
+            }
+        }
+        function del(){
+            window.location.href = "/"
+
+            let now_p_num  = $("#check").text()
+            $.ajax({
+                type: "POST",
+                url: "/detail/del",
+                data: {num_give: now_p_num},
+                success: function (response) {
+
+                }
+            });
+
+        }
+        function del_co(co_num){
+            window.location.reload()
+
+            let now_p_num  = $("#check").text()
+             $.ajax({
+                type: "POST",
+                url: "/detail/delco",
+                data: {co_num_give: co_num, now:now_p_num},
+                success: function (response) {
+                    alert(response["msg"])
+                }
+            });
+
+        }
+
+
+        // 게시글 나열(사이드서버 렌더링으로 대체함)
+
+
+    </script>
+</head>
+<body>
+
+<div class="mainBoard">
+    <h1 onclick="to_main()">미니 전시회</h1>
+</div>
+
+<div class="bts">
+    <button id="loginBtn" onclick="login_page()" type="button" class="btn btn-outline-primary">로그인</button>
+    <button id="postBtn" onclick="to_upload()" type="button" class="btn btn-outline-primary">글올리기</button>
+    <button id="logoutBtn" onclick="logout()" type="button" class="btn btn-outline-primary">로그아웃</button>
+</div>
+
+<div>
+    {% set picture = pic_data['url'] %}
+    {% set pic_name = pic_data['pic_name'] %}
+    {% set pic_explain = pic_data['pic_explain'] %}
+    {% set Status = status %}
+    {% set now_num = pic_data['post_num'] %}
+
+
+    <div class="pic">
+        {% if status %}
+            <div class="upbts">
+                <button onclick="del()" type="button" class="btn btn-dark">삭제</button>
+            </div>
+        {% else %}
+        {% endif %}
+        <div class="check" id="check">{{ now_num }}</div>
+        <div class="card">
+            <img src="{{ picture }}" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h4 class="card-title">그림명: {{ pic_name }}</h4>
+                <p class="card-text">그림 설명: {{ pic_explain }}</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<section class="section is-small">
+
+    <div class="mb-3">
+        <div class="write_bt">
+            <button onclick="comment()" type="button" class="btn btn-outline-secondary">댓글 쓰기</button>
+        </div>
+
+        <div>
+            <textarea class="form-control" id="comment" rows="3"></textarea>
+        </div>
+    </div>
+
+
+    <div id="comment_box">
+        {% for ment in comment_data %}
+            <div class="card">
+                <div class="card-header">
+                    {{ ment['comment_id'] }}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ ment['comment'] }}</h5>
+                    <button onclick="del_co({{ ment['comment_num'] }})" class="btn btn-secondary">삭제</button>
+
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+</section>
+
+
+</body>
+</html>

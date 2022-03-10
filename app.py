@@ -1,43 +1,222 @@
-from flask import Flask, render_template, request, jsonify
-app = Flask(__name__)
-
+from flask import Flask, render_template, request, jsonify, url_for, redirect
 from pymongo import MongoClient
+import requests
+import datetime
+import jwt
+import hashlib
+import certifi
+from datetime import datetime, timedelta
+
+ca = certifi.where()
 client = MongoClient('mongodb+srv://test:sparta@cluster0.u0f3u.mongodb.net/Cluster0?retryWrites=true&w=majority')
 db = client.dbsparta
+app = Flask(__name__)
+
+SECRET_KEY = 'miniExhibition'
 
 
+# 메인페이지
 @app.route('/')
-def main():
-    return render_template("index.html")
+def home():
+    rows = post_list = list(db.post.find({}, {'_id': False}))
+    return render_template('index.html', rows = rows)
 
-@app.route('/posting')
-def detail():
-    return render_template("posting.html")
 
-@app.route("/posting/post", methods=["POST"])
-def upload_post():
-    url_receive = request.form['url_give']
-    pic_name_receive = request.form['pic_name_give']
-    pic_explain_receive = request.form['pic_explain_give']
+# 회원가입
+@app.route("/join", methods=["POST"])
+def join():
+    id_receive = request.form['user_id']
+    pwd_receive = request.form['pwd']
 
-    url_list = list(db.mini.find({}, {'_id': False}))
-    count = len(url_list) + 1
+    password_hash = hashlib.sha256(pwd_receive.encode('utf-8')).hexdigest()
     doc = {
-        'num':count,
-        'url':url_receive,
-        'pic_name':pic_name_receive,
-        'pic_explain':pic_explain_receive
+        "user_id": id_receive,  # 아이디
+        "pwd": password_hash,  # 비밀번호
     }
+    db.miniExhibition.insert_one(doc)
+    return jsonify({'result': 'success'})
 
-    db.mini.insert_one(doc)
 
-    return jsonify({'msg': '등록완료! 나가기를 눌러주세요'})
+# 아이디 중복 확인
+@app.route('/check_dup', methods=['POST'])
+def check_dup():
+    username_receive = request.form['user_id']
+    exists = bool(db.miniExhibition.find_one({"user_id": username_receive}, {'_id': False}))
 
+    return jsonify({'result': 'success', 'exists': exists})
+
+
+# 로그인
+@app.route("/login", methods=["POST"])
+def login():
+    id_receive = request.form['user_id']
+    pwd_receive = request.form['pwd']
+
+    pw_hash = hashlib.sha256(pwd_receive.encode('utf-8')).hexdigest()
+
+    user = db.miniExhibition.find_one({'user_id': id_receive, 'pwd': pw_hash}, {'_id': False})
+
+    if user is not None:
+        payload = {
+            'id': id_receive,
+            'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        return jsonify({'result': 'success', 'token': token})
+    else:
+        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
+
+# 메인페이지 게시글 표시
 @app.route("/posting/post", methods=["GET"])
 def show_images():
-    image_list = list(db.mini.find({}, {'_id': False}))
-
+    image_list = list(db.post.find({}, {'_id': False}))
     return jsonify({'images': image_list})
+
+# 로그인 페이지 이동
+@app.route('/loginpage')
+def loginPage():
+    return render_template("login.html")
+
+
+# 글 등록 페이지 이동
+@app.route('/posting')
+def postingPage():
+    return render_template("posting.html")
+
+#상세페이지
+@app.route('/detail')
+def detailPage():
+    return render_template("detail.html")
+
+#코멘트
+@app.route('/detail')
+def commentPage():
+    ments = list(db.comment.find({}, {'_id': False}))
+    return render_template('detail.html', ments = ments)
+
+#상세 페이지
+@app.route('/detail/<post_num>')
+def detail(post_num):
+
+    pic_data = db.post.find_one({'post_num': int(post_num)}) #post_num##post_num이 안먹음 얘만 고치면 됨 굿굿
+    print(pic_data)
+
+    comment_data = list(db.comment.find({'now': post_num}, {'_id': False}))
+    token_receive = request.cookies.get('mytoken')
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+    status = (pic_data['writer_id'] == payload["id"])  # 내 프로필이면 True, 다른 사람 프로필 페이지면 False
+    return render_template('detail.html', status=status, pic_data=pic_data, comment_data=comment_data)
+
+
+
+
+
+# 글 등록
+@app.route("/posting/post", methods=["POST"])
+def upload_post():
+    token_receive = request.cookies.get('mytoken')
+    try :
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+        user_id = payload["id"]
+        url_receive = request.form['url_give']
+        pic_name_receive = request.form['pic_name_give']
+        pic_explain_receive = request.form['pic_explain_give']
+
+        url_list = list(db.post.find({}, {'_id': False}).distinct('post_num'))  # distinct는 key 값 생략하고 value 값만 가져오기
+
+        if len(url_list) == 0 :
+            count = 1
+        else :
+            count = max(url_list) + 1
+
+        doc = {
+            'post_num': count,
+            'writer_id' : user_id,
+            'url': url_receive,
+            'pic_name': pic_name_receive,
+            'pic_explain': pic_explain_receive
+
+        }
+
+        db.post.insert_one(doc)
+        return jsonify({'msg': '등록완료!'})
+    except(jwt.ExpiredSignatureError, jwt.exceptions.DecodeError) :
+        return redirect(url_for("home"))
+
+
+
+
+
+@app.route('/comment' , methods=["POST"])
+def comment():
+    token_receive = request.cookies.get('mytoken')
+    try :
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+        user_id = payload["id"]
+        comment_receive = request.form["comment_give"]
+        now_p_num = request.form["now_give"]
+
+
+        comment_list = list(db.comment.find({}, {'_id': False}).distinct('comment_num'))  # distinct는 key 값 생략하고 value 값만 가져오기
+
+        if len( comment_list) == 0 :
+            count = 1
+        else :
+            count = max(comment_list) + 1
+
+        doc = {
+            'comment_num': count,
+            'comment_id' : user_id,
+            'comment': comment_receive,
+            'now': now_p_num
+        }
+
+
+        db.comment.insert_one(doc)
+        return jsonify({'msg': '댓글 등록완료!'})
+    except(jwt.ExpiredSignatureError, jwt.exceptions.DecodeError) :
+        return redirect(url_for("home"))
+
+@app.route('/detail/del' , methods=["POST"])
+def delete():
+    num_receive = request.form["num_give"]
+    db.post.delete_one({'post_num': int(num_receive)})
+
+
+
+@app.route('/detail/delco' , methods=["POST"])
+def delete_co():
+    token_receive = request.cookies.get('mytoken')
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+    now_receive = request.form["now"]
+    co_num_receive = request.form["co_num_give"]
+    now_search = db.post.find_one({'post_num':int(now_receive)})
+    id_com = db.comment.find_one({'comment_num': int(co_num_receive),'now':now_receive})
+    print(now_receive)
+    print(now_search["post_num"])
+    print(now_receive == now_search["post_num"])
+
+
+
+    if (now_receive == int(now_search["post_num"])) and (id_com['comment_id'] == payload["id"]):
+        db.comment.delete_one({'comment_num': co_num_receive,'now':now_receive})
+        return jsonify({'msg': '삭제완료!'})
+    else :
+        return jsonify({'msg': '본인이 아닙니다.!'})
+
+
+
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
+
+
+
+
+
